@@ -66,10 +66,15 @@ def filter_products(filters):
             # print(" df[manufacturer] ",df["manufacturer"][0])
             if isinstance(value, list):
                 match_mask = df["manufacturer"].fillna('').str.lower().apply(lambda c: any(v.lower() in c for v in value))
+                df = df[match_mask]
+                continue
             else:
-                match_mask = df["manufacturer"].fillna('').str.lower().str.contains(str(value).lower())
-            df = df[match_mask]
-            continue
+                # print("key ",key)
+                # print("value ",value)
+                match_mask = df["manufacturer"].fillna('').str.lower().apply(lambda x: any(
+                word in x for word in str(value).lower().replace(",", " ").split()))
+                df = df[match_mask]
+                continue
 
         if key=="min_price":
             match_mask = (df["price"] >= value)
@@ -85,7 +90,9 @@ def filter_products(filters):
             if isinstance(value, list):
                 match_mask = df["title"].str.lower().apply(lambda c: any(v in c for v in value))
             else:
-                match_mask = df["title"].str.lower().str.contains(str(value).lower())
+                match_mask = df["title"].str.lower().apply(lambda x: any(
+                word in x for word in str(value).lower().replace(",", " ").split()
+            ))
 
         elif key == "min_rating":
             match_mask = df["rating"] >= value
